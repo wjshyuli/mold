@@ -1,0 +1,103 @@
+# ======================
+# Python / Django
+# ======================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.log
+
+# Django
+# db.sqlite3
+# db.sqlite3-journal
+
+# Django migrations (如果想保留迁移文件，把下面两行删掉)
+*/migrations/__pycache__/
+
+# Django static
+staticfiles/
+static_root/
+
+# ======================
+# Virtual Environment
+# ======================
+
+venv/
+env/
+.venv/
+
+# Conda
+.env
+*.env
+
+
+# ======================
+# Node / Vue
+# ======================
+
+node_modules/
+
+dist/
+
+.vite/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.pnpm-debug.log*
+
+
+# ======================
+# IDE
+# ======================
+
+.idea/
+
+.vscode/
+
+*.swp
+*.swo
+
+
+# ======================
+# OS
+# ======================
+
+.DS_Store
+
+Thumbs.db
+
+
+# ======================
+# Docker
+# ======================
+
+*.pid
+
+
+# ======================
+# Environment config
+# ======================
+
+.env
+.env.*
+!.env.example
+
+
+# ======================
+# Python cache
+# ======================
+
+.pytest_cache/
+
+.mypy_cache/
+
+
+# ======================
+# Upload files
+# ======================
+
+media/
+uploads/
