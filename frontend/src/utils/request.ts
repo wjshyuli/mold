@@ -1,14 +1,51 @@
-// src/utils/request.ts
+
 
 import axios from 'axios'
 
 const request = axios.create({
   // Django 地址
-  baseURL: '/api/',
+  baseURL: '/',
 
   // 超时时间（毫秒）
-  timeout: 25000,
+	timeout: 60000, 
+  
+      // 允许浏览器携带 Cookie
+	withCredentials: true,
+  
+      // 告诉 Axios CSRF Cookie 和 Header 的名称
+    xsrfCookieName: "csrftoken",
+    xsrfHeaderName: "X-CSRFToken",
 })
+
+request.interceptors.request.use(config => {
+
+
+    const csrfToken = document.cookie
+        .split("; ")
+        .find(row => row.startsWith("csrftoken="))
+        ?.split("=")[1]
+
+
+    if(csrfToken){
+
+        config.headers["X-CSRFToken"] = csrfToken
+
+    }
+
+
+    return config
+
+})
+
+
+
+
+
+
+
+
+
+
 
 // 导出
 export default request

@@ -110,17 +110,19 @@
   
   <script setup lang="ts">
 	import { useFactoryStore } from "@/stores/factory"
-	import { ref } from "vue"
-	import { onMounted } from "vue"
+	import { storeToRefs } from "pinia"
+	import { ref ,watch} from "vue"
+	import { downloadBlob } from "@/utils/download"
+	
 	import { getMoldStatus } from "@/api/mold"
 	import { ElMessage } from "element-plus"
 	
 	  
 	const factory_store =useFactoryStore()
+	const {factory} = storeToRefs(factory_store)
 	
 	
 	const loading = ref(false)
-	  
 	const tableData = ref<any[]>([])
 	
 
@@ -130,15 +132,12 @@
 	
   
 	const fetchData = async () => {
-		
-		
-		
 
 		loading.value=true
 		console.log('fac'+factory_store.factory);
 	 
 		const body = {
-			 "factory": factory_store.factory,
+			 "factory": factory.value,
 
 		 }
 		
@@ -168,53 +167,29 @@
 	}
 
 	  
-	onMounted(() => {
-	  
+	watch(
+	factory,
+	async() => {
+		await fetchData()
+		ElMessage.success("显示分厂数据成功")
+	},
+	{
+		immediate:true		
+	}
+	)
+  
+  
+  
+
+const exportExcel = async() => {
 	
-	  
-	  })
-  
-  
-  
-import * as XLSX from "xlsx"	
-import { saveAs } from "file-saver"
-const exportExcel = () => {
+	window.open("/fastapi/export_modlstatus", "_blank")
 	
-  const exportData = tableData.value.map(item => ({
-    "部门名称": factory_store.factory,
-	"工厂":item.aa
-	
-
-  }))
-  
- console.log(tableData.value)
- console.log(factory_store.factory)
- 
- 
-
-
-  // 1. 把 JSON 转成 sheet
-  const worksheet = XLSX.utils.json_to_sheet(exportData)
-
-  // 2. 创建 workbook
-  const workbook = XLSX.utils.book_new()
-
-  // 3. 把 sheet 放进 workbook
-  XLSX.utils.book_append_sheet(workbook, worksheet, "周期牌")
-
-  // 4. 生成二进制
-  const excelBuffer = XLSX.write(workbook, {
-    bookType: "xlsx",
-    type: "array"
-  })
-
-  // 5. 生成 Blob
-  const blob = new Blob([excelBuffer], {
-    type: "application/octet-stream"
-  })
-
-  // 6. 下载
-  saveAs(blob, "周期牌.xlsx")
+	ElMessage.success("文件下载中✅")
 }
+	
+
+ 
+
 
 </script>

@@ -5,44 +5,64 @@ import request from "@/utils/request"
 // 查询
 export function getSpecification(factory:Number	) {
 
-    return request.get("/mold/specification",{
+    return request.get("api/specification",{
 		params:{factory}
 	})
 
 }
+export function export_Specification(body:any){
+	return request.post('/fastapi/export_specification',body,  {
+      responseType: "blob",
+    })
+}
+
 
 //-----weekcard 周转卡
 export function WeekCard(body:any){
-	return request.post("/mold/weekcard",body)
+	return request.post("api/weekcard",body)
 }
 
-// 新增
-export function getStockBase(){
-
-    return request.post("/stock/stockbase")
-
+export function export_WeekCard(body: any) {
+    return request.post(
+        "/fastapi/export_weekcard",
+        body,
+        {
+            responseType: "blob"
+        }
+    )
 }
-
-// 修改
-export function updateSpecification(id:number,data:any){
-
-    return request.put(`/mold/a/${id}`,data)
-
-}
-
-// 删除
-export function deleteSpecification(id:number){
-
-    return request.delete(`/mold/a/${id}`)
-
-}
-
 
 //-----模具现状
 export function getMoldStatus(body:any){
-	return request.post("/mold/mold_status",body)
+	return request.post("api/mold_status",body)
 }
 
+export function export_MoldStatus(){
+	return true
+}
+
+//------停机状态 Django
 export function getStopStatus(body:any){
-	return request.post("/mold/stop_status",body)
+	return request.post("api/stop_status",body)
+}
+//-------fastapi
+export function export_StopStatus_detail(body:any){
+	return request.post("/fastapi/export_stopstatus_detail",body,  {
+      responseType: "blob",
+    })
+}
+export function export_StopStatus_summary(body:any){
+	return request.post('/fastapi/export_stopstatus_summary',body,  {
+      responseType: "blob",
+    })
+}
+export function export_StopStatus_shift(body:any){
+	return request.post('/fastapi/export_stopstatus_shift',body,  {
+      responseType: "blob",
+    })
+}
+export function export_StopStatus_machine(body:any){
+	return request.post('/fastapi/export_stopstatus_machine',body,  {
+      responseType: "blob",
+    })
 }

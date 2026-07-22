@@ -1,8 +1,8 @@
 <template>
     <div class="top">
     	<div class="topleft" >
-    		<h2 style="border: ;">硫化停机统计</h2>
-    	
+    		<h2 style="border">硫化停机统计</h2>
+
     		<el-date-picker
     		v-model="timeRange"
     		type="datetimerange"
@@ -10,7 +10,7 @@
     		start-placeholder="开始时间"
     		end-placeholder="结束时间"
     		value-format="YYYY-MM-DD HH:mm:ss"
-    		
+
     		/>
     		</div>
     	<div class="topright">
@@ -20,293 +20,279 @@
     		>
     		  查询
     		</el-button>
-			
+
     		<el-button
     		  type="primary"
     		  @click="refresh"
     		>
     		  刷新
     		</el-button>
-			
+
     		<el-button
-    		  type="success"
-    		  @click="exportExcel"
+				type="success"
+				:loading="exportLoading"
+				@click="exportExcel"
     		>
     		  导出
     		</el-button>
-			
+
     	</div>
     </div>
-    
- 
-	
-	<el-tabs v-model="activeName">
-	  
 
-	  
+
+
+	<el-tabs v-model="activeName">
+
+
+
 	    <el-tab-pane
 	      label="机台汇总"
 	      name="machine"
 	    >
 	    <MachineTable ref="machineRef"/>
 	    </el-tab-pane>
-	  
+
 	    <el-tab-pane
 	      label="班组汇总"
 	      name="shift"
 	    >
 	    <ShiftTable ref="shiftRef"/>
 	    </el-tab-pane>
-		
+
 		<el-tab-pane
 		  label="停机明细"
 		  name="detail"
 		>
 		<DetailTable ref="detailRef"/>
 		</el-tab-pane>
-			  
+
 		<el-tab-pane
 		  label="停机汇总"
 		  name="summary"
 		>
 		<SummaryTable ref="summaryRef"/>
 		</el-tab-pane>
-	  
+
 	</el-tabs>
-	
+
 
 
 
 
 
 </template>
-  
- 
-  
-  
+
+
+
+
 <script setup lang="ts">
 	import DetailTable from "@/views/mold/stop_status/DetailTable.vue"
 	import SummaryTable from "@/views/mold/stop_status/SummaryTable.vue"
 	import MachineTable from "@/views/mold/stop_status/MachineTable.vue"
 	import ShiftTable from "@/views/mold/stop_status/Shift.vue"
-	
-	
-	
+
+
+
 	import { useFactoryStore } from "@/stores/factory"
-	import { ref } from "vue"
-	import { onMounted } from "vue"
-	import { getStopStatus } from "@/api/mold"
+	import { storeToRefs } from "pinia"
+	import { onMounted, ref,watch } from "vue"
+	import { downloadBlob } from "@/utils/download"
+
 	import { ElMessage } from "element-plus"
-	const activeName = ref("machine")
-	
+
+	import { computed } from "vue"
+	type TabName = "detail"| "summary"| "machine"| "shift"
+
+	const activeName = ref<TabName>("machine")
+
+
 	const detailRef = ref()
 	const summaryRef = ref()
 	const machineRef = ref()
 	const shiftRef = ref()
-	
-	
+	const exportLoading = ref(false) 
+	const pageMap = {
+	  detail: detailRef,
+	  machine: machineRef,
+	  shift: shiftRef,
+	  summary: summaryRef,
+	}
+
+
 	const factory_store =useFactoryStore()
-	console.log(factory_store.factory)
-	
-	const loading = ref(false)
-	  
-	const tableData = ref<any[]>([])
-	
-	
+	const {factory} = storeToRefs(factory_store)
+
 	const timeRange = ref<any[]>([])
+
+
+
+	const initTimeRange = () => {
+
+	    const today = new Date()
+
+	    // 今天07:00
+	    const end = new Date(today)
+	    end.setHours(7, 0, 0, 0)
+
+	    // 昨天07:00
+	    const start = new Date(end)
+	    start.setDate(start.getDate() - 1)
+
+	    timeRange.value = [
+	        formatDate(start),
+			formatDate(end)
+
+
+	    ]
+
+	}
+
+
+
 	const formatDate = (date: Date) => {
 	    const pad = (n: number) => String(n).padStart(2, "0")
-	
+
 	    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
 	}
 
-	  
-	  // 时间范围
+	const currentPage = computed(() => pageMap[activeName.value]?.value)
+	const body = computed(
+		()=>({
+		factory: factory_store.factory,
+		st: timeRange.value[0],
+		et: timeRange.value[1],
+		type: activeName.value,
+	 }))
 
-	
-	
-	const search = () => {
-		const body = {
-			factory: factory_store.factory,
-			st: timeRange.value[0],
-			et: timeRange.value[1],
-			type: activeName.value
-		}
-		console.log(body);
-		switch (activeName.value) {
-			case "detail":
-				console.log('这个对的');
-				detailRef.value?.fetchData(body)
-				break
-			case "summary":
-				summaryRef.value?.fetchData(body)
-				break
-			case "machine":
-				machineRef.value?.fetchData(body)
-				break
-			case "shift":
-				shiftRef.value?.fetchData(body)
-				break
-		}
-	}
-	
-	
-	
-  
-	const fetchData = async () => {
-		console.log(timeRange.value)
-		
+
+	const search = async() => {
+		console.log("activeName1111", activeName.value)
+		console.log("currentPage1111", currentPage.value)
 		if(!timeRange.value||timeRange.value.length !== 2  ){
 		        ElMessage.warning("请选择时间范围")
 		        return
 		    }
+		console.log(currentPage.value)
+		console.log(currentPage.value?.fetchData)
+		await currentPage.value?.fetchData(body.value)
 
-		loading.value=true
-	 
-		const body = {
-			 factory: factory_store.factory,
-			 st: timeRange.value[0],
-			 et: timeRange.value[1],
-		 }
-		console.log(body)
-		try{
-			const res=await getStopStatus(body)
-			tableData.value = res.data
-		}
-		catch (error) {
-		
-			ElMessage.error("网络异常，请稍后重试")
-			console.log(error)
-		
-		} finally {
-			loading.value = false
-		}
-		
-		 
-	 } 
-  
-
-  
-	const initTimeRange = () => {
-	
-	    const today = new Date()
-	
-	    // 今天07:00
-	    const end = new Date(today)
-	    end.setHours(7, 0, 0, 0)
-	
-	    // 昨天07:00
-	    const start = new Date(end)
-	    start.setDate(start.getDate() - 1)
-	
-	    timeRange.value = [
-	        formatDate(start),
-			formatDate(end)
-			
-	        
-	    ]
-		
-		console.log(timeRange.value)
-	}
-  
-	const refresh = async()=>{
-	
-	    initTimeRange()
-	
-
-	
+		ElMessage.success('查询完成')
 	}
 	
+import { ElLoading } from "element-plus"
+const exportExcel = async () => {
+  if (!timeRange.value || timeRange.value.length !== 2) {
+    ElMessage.warning("请选择时间范围")
+    return
+  }
 
-	  
-	onMounted(() => {
-	  
-		  initTimeRange()
-	  
-	  })
-  
+  exportLoading.value = true
+	const loading = ElLoading.service({
+      lock: true,
+      text: "文件正在生成，请稍候……",
+      background: "rgba(0,0,0,0.5)"
+    })
+  console.log("开始导出")
 
+  try {
+    console.log("开始请求后端")
 
+    const res = await currentPage.value.exportData(body.value)
 
- 
-  
-import * as XLSX from "xlsx"	
-import { saveAs } from "file-saver"
-const exportExcel = () => {
-	
-  const exportData = tableData.value.map(item => ({
-    "部门名称": factory_store.factory,
-	
-    "机台": item.Sbid,
-    
-    "类型": item.Types,
+    console.log("后端返回", res)
 
-    "周期牌": item.Zqp,
+    downloadBlob(res.data, `${activeName.value}.xlsx`)
 
-    "操作人": item.CreateUserid,
-    "操作时间": item.CreateDate,
-  }))
-  
- console.log(tableData.value)
- console.log(factory_store.factory)
- 
- 
-	tableData.value.forEach(item => {
-	console.log('yifen shuju ');
-	  console.log(item)
-	})
+    console.log("下载完成")
+  } catch (e) {
+    console.error(e)
+    ElMessage.error("导出失败")
+  } finally {
+    console.log("finally")
 
-  // 1. 把 JSON 转成 sheet
-  const worksheet = XLSX.utils.json_to_sheet(exportData)
-
-  // 2. 创建 workbook
-  const workbook = XLSX.utils.book_new()
-
-  // 3. 把 sheet 放进 workbook
-  XLSX.utils.book_append_sheet(workbook, worksheet, "周期牌")
-
-  // 4. 生成二进制
-  const excelBuffer = XLSX.write(workbook, {
-    bookType: "xlsx",
-    type: "array"
-  })
-
-  // 5. 生成 Blob
-  const blob = new Blob([excelBuffer], {
-    type: "application/octet-stream"
-  })
-
-  // 6. 下载
-  saveAs(blob, "周期牌.xlsx")
+    exportLoading.value = false
+	loading.close()
+  }
 }
 
-  
-  </script>
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  <style >
-	  .topleft{
+
+
+
+
+
+
+
+	const refresh = async()=>{
+
+	    initTimeRange()
+		await search()
+
+	}
+
+
+	onMounted(
+	()=>{
+	initTimeRange()
+	search()
+	}
+	)
+
+	watch(
+		[factory,activeName],
+		() => {
+		search()
+	  }
+	  )
+
+	watch(timeRange, (newValue) => {
+	  if (!newValue || newValue.length !== 2) return
+
+	  const start = new Date(newValue[0])
+	  const end = new Date(newValue[1])
+
+	  const diffDays =
+	    (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+
+	  if (diffDays > 7) {
+	    ElMessage.warning("查询时间不能超过7天，已恢复默认时间")
+	    initTimeRange()
+	  }
+	})
+
+
+
+
+
+
+
+
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+<style >
+	.topleft{
 		  display: flex;
 		  justify-content: space-between;
 		  width: 700px;
 		  align-items: center;
 		  gap: 20px;
 	  }
-	  .top,.topright{
+	.top,.topright{
 		  display: flex;
 		  align-items: center;
 		  gap: 20px;
 	  }
-	  
-  </style>
-  
+
+</style>

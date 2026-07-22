@@ -5,6 +5,7 @@
     border
     stripe
     style="width:100%"
+	v-loading="loading"
   >
     <el-table-column
       prop="gc"
@@ -37,20 +38,22 @@
 
 <script setup lang="ts">
 import { ref } from "vue"
-import { getStopStatus } from "@/api/mold"
+import { export_StopStatus_machine, getStopStatus } from "@/api/mold"
 import { ElMessage } from "element-plus"
 
 const tableData = ref<any[]>([])
+const loading = ref(false)
 
 const fetchData = async (body:any) => {
 
     try{
-	
+		loading.value=true
 		console.log(body)
         const res = await getStopStatus(body)
 
 
         tableData.value = res.data
+		loading.value=false
 
     }catch(error){
 
@@ -63,7 +66,41 @@ const fetchData = async (body:any) => {
 
 }
 
+
+
+
+
+
+
+
+
+const exportData = async (body:any) => {
+
+    try{
+	
+    const body1 = {
+        st: body.st,
+        et: body.et
+    }
+
+    return await export_StopStatus_machine(body1)
+
+    }catch(error){
+
+        ElMessage.error("网络异常")
+    }
+
+}
+
+  
+
+  
+
+
+
+
 defineExpose({
-    fetchData
+    fetchData,
+	exportData
 })
 </script>

@@ -88,21 +88,23 @@
   
   <script setup lang="ts">
 	import { useFactoryStore } from "@/stores/factory"
-	import { ref } from "vue"
-	import { onMounted } from "vue"
-	import { WeekCard } from "@/api/mold"
+	import { storeToRefs } from "pinia"
+	import { watch,ref} from "vue"
+	import { WeekCard,export_WeekCard } from "@/api/mold"
 	import { ElMessage } from "element-plus"
 	
+	import { downloadBlob } from "@/utils/download"
 	  
 	const factory_store =useFactoryStore()
-	console.log(factory_store.factory)
+	const {factory} =storeToRefs(factory_store)
+	
 	
 	const loading = ref(false)
-	  
 	const tableData = ref<any[]>([])
 	
 	
 	const timeRange = ref<any[]>([])
+	
 	const formatDate = (date: Date) => {
 	    const pad = (n: number) => String(n).padStart(2, "0")
 	
@@ -111,12 +113,17 @@
 
 	  
 	  // 时间范围
+	  const get_body =()=> ({
+	  	 factory: factory_store.factory,
+	  	 st: timeRange.value[0],
+	  	 et: timeRange.value[1],
+	   })
 
 
 	
   
 	const fetchData = async () => {
-		console.log(timeRange.value)
+		
 		
 		if(!timeRange.value||timeRange.value.length !== 2  ){
 		        ElMessage.warning("请选择时间范围")
@@ -125,12 +132,8 @@
 
 		loading.value=true
 	 
-		const body = {
-			 factory: factory_store.factory,
-			 st: timeRange.value[0],
-			 et: timeRange.value[1],
-		 }
-		console.log(body)
+		const body = get_body()
+		
 		try{
 			const res=await WeekCard(body)
 			tableData.value = res.data
@@ -147,8 +150,7 @@
 		 
 	 } 
   
-	const exportExcl =() =>{}
-  
+
   
 	const initTimeRange = () => {
 	
@@ -168,8 +170,7 @@
 			
 	        
 	    ]
-		console.log('我要输出时间了')
-		console.log(timeRange.value)
+		
 	}
   
 	const refresh = async()=>{
@@ -182,66 +183,61 @@
 	
 
 	  
-	onMounted(() => {
-	  
-		  initTimeRange()
-	  
-	  })
-  
-  
-  
-import * as XLSX from "xlsx"	
-import { saveAs } from "file-saver"
-const exportExcel = () => {
-	
-  const exportData = tableData.value.map(item => ({
-    "部门名称": factory_store.factory,
-	
-    "机台": item.Sbid,
-    
-    "类型": item.Types,
-
-    "周期牌": item.Zqp,
-
-    "操作人": item.CreateUserid,
-    "操作时间": item.CreateDate,
-  }))
-  
- console.log(tableData.value)
- console.log(factory_store.factory)
- 
- 
-	tableData.value.forEach(item => {
-	console.log('yifen shuju ');
-	  console.log(item)
-	})
-
-  // 1. 把 JSON 转成 sheet
-  const worksheet = XLSX.utils.json_to_sheet(exportData)
-
-  // 2. 创建 workbook
-  const workbook = XLSX.utils.book_new()
-
-  // 3. 把 sheet 放进 workbook
-  XLSX.utils.book_append_sheet(workbook, worksheet, "周期牌")
-
-  // 4. 生成二进制
-  const excelBuffer = XLSX.write(workbook, {
-    bookType: "xlsx",
-    type: "array"
-  })
-
-  // 5. 生成 Blob
-  const blob = new Blob([excelBuffer], {
-    type: "application/octet-stream"
-  })
-
-  // 6. 下载
-  saveAs(blob, "周期牌.xlsx")
-}
 
   
-  </script>
+  
+	watch(
+	factory ,
+	async ()=>{
+		
+		initTimeRange()
+		await fetchData()
+		ElMessage.success("分厂数据展示成功")
+		},
+	    {immediate: true}
+	)
+  
+  
+ import { ElLoading } from "element-plus" 
+	const exportExcel = async () => {
+		const loading = ElLoading.service({
+		    lock: true,
+		    text: "文件正在生成，请稍候……",
+		    background: "rgba(0,0,0,0.5)"
+		  })
+		console.log("开始导出")
+		try {
+		  const body =get_body()
+		  const res = await export_WeekCard(body)
+		  downloadBlob(res.data, "weekcard.xlsx")
+		  console.log("下载完成")
+		} catch (e) {
+		  console.error(e)
+		  ElMessage.error("导出失败")
+		} finally {
+		  console.log("finally")
+		
+		  
+		loading.close()
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	}
+  
+  
+
+
+  
+</script>
   
   
   

@@ -34,80 +34,14 @@
 
   <div class="content">
 
-    <!-- 左边 -->
 
-    <div class="table-box">
-
-      <h3>胶囊库存数量</h3>
-
-      <el-table
-        :data="capsuleData"
-        border
-        stripe
-        height="700"
-      >
-
-        <el-table-column
-          prop="specification"
-          label="胶囊规格"
-		  width="240"
-        />
-
-        <el-table-column
-          prop="quantity"
-          label="胶囊数量(个)"
-		  width="120"
-        />
-		
-		<el-table-column
-		  label="操作"
-		  width="240"
-		  
-		>
-		
-		<template #default="{row}" >
-			<div class="ction-buttons">
-			
-			<el-button
-			  type="success"
-			  size="default"
-			  @click="editStock(row)"
-			>
-			  编辑
-			</el-button>
-				
-				
-		    <el-button
-		      type="danger"
-		      size="default"
-		      @click="deleteStock(row.id)"
-		    >
-		      删除
-		    </el-button>
-			
-		
-			
-			</div>
-			
-			
-		
-		</template>
-		
-		</el-table-column>
-		
-
-      </el-table>
-
-    </div>
-
-    <!-- 右边 -->
 
     <div class="table-box">
 
       <h3>夹盘库存数量</h3>
 
       <el-table
-        :data="clampData"
+        :data="tableData"
         border
         stripe
         height="700"
@@ -115,10 +49,17 @@
       >
 
         <el-table-column
-          prop="specification"
+          prop="Clamp"
           label="夹盘规格"
 		  width="240px"
         />
+
+		<el-table-column
+		  prop="MachineStyle"
+		  label="硫化机型"
+		  width="240px"
+		/>
+
 
         <el-table-column
           prop="quantity"
@@ -271,25 +212,9 @@ const tableData = ref<any[]>([])
 
 
 
-// 胶囊数据
-const capsuleData = computed(()=>{
-
-    return tableData.value.filter(
-        item => item.type === "胶囊"
-    )
-
-})
 
 
 
-// 夹盘数据
-const clampData = computed(()=>{
-
-    return tableData.value.filter(
-        item => item.type === "夹盘"
-    )
-
-})
 
 
 

@@ -4,7 +4,7 @@ import request from "@/utils/request"
 // 获取库存基础数据
 export function getStockBase(){
 
-    return request.get("/mold/stock_base/")
+    return request.get("api/stock_base/")
 
 }
 
@@ -12,7 +12,7 @@ export function getStockBase(){
 export function addStockBase(data:any){
 
     return request.post(
-        "/mold/stock_base/",
+        "api/stock_base/",
         data
     )
 
@@ -22,7 +22,7 @@ export function addStockBase(data:any){
 export function deleteStockBase(id:number){
 
     return request.delete(
-        `/mold/stock_base/${id}/`
+        `api/stock_base/${id}/`
     )
 
 }
@@ -30,7 +30,7 @@ export function deleteStockBase(id:number){
 export function updateStockBase(id:number,body:any){
 
     return request.put(
-        `/mold/stock_base/${id}/`,
+        `api/stock_base/${id}/`,
 		body
     )
 
@@ -43,7 +43,7 @@ export function updateStockBase(id:number,body:any){
 // 获取库存基础数据-------------------------
 export function getStockCor(){
 
-    return request.get("/mold/stock_Cor/")
+    return request.get("api/stock_Cor/")
 
 }
 
@@ -51,7 +51,7 @@ export function getStockCor(){
 export function addStockCor(data:any){
 
     return request.post(
-        "/mold/stock_Cor/",
+        "api/stock_Cor/",
         data
     )
 
@@ -61,7 +61,7 @@ export function addStockCor(data:any){
 export function deleteStockCor(id:number){
 
     return request.delete(
-        `/mold/stock_Cor/${id}/`
+        `api/stock_Cor/${id}/`
     )
 
 }
@@ -69,7 +69,7 @@ export function deleteStockCor(id:number){
 export function updateStockCor(id:number,body:any){
 
     return request.put(
-        `/mold/stock_Cor/${id}/`,
+        `api/stock_Cor/${id}/`,
 		body
     )
 
@@ -79,7 +79,7 @@ export function updateStockCor(id:number,body:any){
 
 export function showStock(body:any){
 	return request.post(
-	"/mold/stock_show/",
+	"api/stock_show/",
 	body
 	)
 }

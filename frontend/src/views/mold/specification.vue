@@ -145,71 +145,67 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import { ref, watch} from "vue"
+import { downloadBlob } from "@/utils/download"
 
-import { getSpecification } from "@/api/mold"
+import { getSpecification, export_Specification } from "@/api/mold"
+import { ElMessage } from "element-plus"
 
-const loading = ref(false)
-const tableData = ref<any[]>([])
 
 import { useFactoryStore } from "@/stores/factory"
 import { storeToRefs } from "pinia"
 
-import * as XLSX from "xlsx"
-import { saveAs } from "file-saver"
-
 const factoryStore = useFactoryStore()
 const { factory } = storeToRefs(factoryStore)
 
+
+
+const loading = ref(false)
+const tableData = ref<any[]>([])
+
+
+
 // ----------
+import { ElLoading } from "element-plus"
+const exportExcel = async() => {
 
-const exportExcel = () => {
 	
-  const exportData = tableData.value.map(item => ({
-    "部门名称": item.departmentName,
-    "设备": item.sbid,
-    "硫化机状态": item.bz,
-    "类型": item.dso,
-    "模号": item.mjbh,
-    "胶囊编号": item.jnbh,
-    "订单号": item.ddh,
-    "物料名称": item.wlmc,
-    "周期牌": item.dot,
-    "连续生产总量(PLC)": item.dqjtcl,
-    "胶囊计数(PLC)": item.jnjs,
-    "模具类型(PLC)": item.hqdsmpd,
-    "计划数": item.sl,
-    "计数剩余数量": item.ys,
-  }))
-
-  // 1. 把 JSON 转成 sheet
-  const worksheet = XLSX.utils.json_to_sheet(exportData)
-
-  // 2. 创建 workbook
-  const workbook = XLSX.utils.book_new()
-
-  // 3. 把 sheet 放进 workbook
-  XLSX.utils.book_append_sheet(workbook, worksheet, "硫化机规格")
-
-  // 4. 生成二进制
-  const excelBuffer = XLSX.write(workbook, {
-    bookType: "xlsx",
-    type: "array"
-  })
-
-  // 5. 生成 Blob
-  const blob = new Blob([excelBuffer], {
-    type: "application/octet-stream"
-  })
-
-  // 6. 下载
-  saveAs(blob, "硫化机规格.xlsx")
+	const loading = ElLoading.service({
+	    lock: true,
+	    text: "文件正在生成，请稍候……",
+	    background: "rgba(0,0,0,0.5)"
+	  })
+	console.log("开始导出")
+	
+	try {
+	  console.log("开始请求后端")
+	
+	
+	const res = await export_Specification({})
+	downloadBlob(res.data, "specification.xlsx")
+	
+	  console.log("下载完成")
+	} catch (e) {
+	  console.error(e)
+	  ElMessage.error("导出失败")
+	} finally {
+	  console.log("finally")
+	
+	  
+	loading.close()
+	}
+	
+	
+	
+	
+	
+	
 }
 
-// 获取数据
-import { ElMessage } from "element-plus"
 
 
+
+//--------------
 const fetchData = async () => {
 
     loading.value = true
@@ -218,7 +214,7 @@ const fetchData = async () => {
 
         const res = await getSpecification(factory.value)
 		console.log('这是几分厂：   '+factory.value)
-		console.log(res.data[0])
+		
 
         
             tableData.value = res.data
@@ -239,11 +235,14 @@ const fetchData = async () => {
 }
 
 
-onMounted(() => {
 
-  fetchData()
+//-------
 
+watch(factory, fetchData, {
+    immediate: true
 })
+
+//---------
 
 </script>
 

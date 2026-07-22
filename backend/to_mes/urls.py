@@ -1,7 +1,7 @@
 from django.urls import path ,include
 from rest_framework.routers import DefaultRouter
-from .views import Specification,WeekCard,MoldStatus,StopStatus,StopReport,StockViewSet,StockCorViewSet,stock_show
-
+from .views import Specification, WeekCard, MoldStatus, StopStatus, StopReport, StockViewSet, StockCorViewSet, csrf, Me
+from .views import stock_show,LoginView,Me
 router = DefaultRouter()
 router.register("stock_base", StockViewSet)
 router.register("stock_Cor", StockCorViewSet)
@@ -15,5 +15,8 @@ urlpatterns = [
     path("stop_report", StopReport.as_view()),
     path("", include(router.urls)),
     path("stock_show/", stock_show),
+    path("login/", LoginView.as_view()),
+    path("csrf/", csrf),
+    path("me/", Me.as_view()),
 
 ]

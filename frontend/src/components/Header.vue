@@ -5,31 +5,24 @@
 				
 			</div> -->
 			
-			<div class="toolbar">
-				<span>分厂：</span>
-				
-				<el-select v-model= "factory" style="width: 150px;">
-					<el-option label="一分厂" :value="1"></el-option>
-					<el-option label="二分厂" :value="2"></el-option>
-					<el-option label="三分厂PCR" :value="30"></el-option>
-					<el-option label="三分厂TBR" :value="31"></el-option>
-
-				</el-select>
-				
-
-
-				
-				
-
-				
-			</div>
 			
+			<el-radio-group v-model="factory" class="factory-group">
+			  <el-radio-button :value="1">
+			    一分厂
+			  </el-radio-button>
 			
-<!-- 			<div class="download">
-				<el-button type="primary">
-					导出Excle
-				</el-button>
-			</div -->
+			  <el-radio-button :value="2">
+			    二分厂
+			  </el-radio-button>
+			
+			  <el-radio-button :value="30">
+			    三分厂PCR
+			  </el-radio-button>
+			
+			  <el-radio-button :value="31">
+			    三分厂TBR
+			  </el-radio-button>
+			</el-radio-group>
 			
 			
 			<div class="user">
@@ -82,7 +75,7 @@
 </script>
 
 
-<style scoped>
+<style >
 .headerr {
   height: 60px;
 
@@ -96,9 +89,6 @@
   background: white; 
 }
 
-.logo {
-  min-width: 120px;
-}
 
 .toolbar {
   display: flex;
@@ -126,4 +116,5 @@
 .user:hover {
   color: #409EFF;
 }
+
 </style>

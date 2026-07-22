@@ -1,4 +1,7 @@
 import  requests
+from django.utils.dateparse import postgres_interval_re
+
+
 #-------- 1、硫化机规格设置
 def specification(factory):
     factory_map = {
@@ -37,6 +40,7 @@ def weekcard(body):
     }
     function = factory_map.get(factory)
     print(function)
+    print(function.__name__)
     print(req)
     if function:
         return function(req)
@@ -192,14 +196,19 @@ def get_weekcard_f1(body):
     headers = {
         "Content-Type": "application/json; charset=UTF-8"
     }
+
+
+
     response = requests.post( url=url, headers=headers, json=body)
     data=response.json().get('Object')
+
     return data
 def get_weekcard_f2(body):
     url="http://10.3.10.62:18080/Webjtzqhghjl/Frm_iQuery"
     headers = {
         "Content-Type": "application/json; charset=UTF-8"
     }
+
     response = requests.post( url=url, headers=headers, json=body)
     data=response.json().get('Object')
     return data

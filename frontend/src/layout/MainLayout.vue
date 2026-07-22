@@ -18,6 +18,9 @@
 		<el-menu-item index="/">
 		    首页
 		</el-menu-item>
+<!-- 		<el-menu-item index="Login">
+		    登录
+		</el-menu-item> -->
 
 		
         <el-sub-menu index="mold">
@@ -41,8 +44,8 @@
             硫化停机统计
           </el-menu-item>
 
-          <el-menu-item index="/mold/stop_report">
-            硫化停机统计报表
+          <el-menu-item index="/mold/goF4">
+            四分厂模具链接
           </el-menu-item>
         </el-sub-menu>
 
