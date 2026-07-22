@@ -62,6 +62,8 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:8080",
+    "http://10.3.21.111:8080",
 ]
 
 ROOT_URLCONF = 'config.urls'
